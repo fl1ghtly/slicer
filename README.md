@@ -1,5 +1,5 @@
 # image-split
-Separates images into individual .png 
+Separates images that have transparent spaces in between objects into individual .png files that only contain those objects
 
 # Usage
 1. Open CMD in the Windows Start Menu
