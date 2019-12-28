@@ -21,14 +21,13 @@ def transparent(image, data):
     col_num = 0
     row_detect = False # Used incase there are more than 1 pix gap for upper bound
     col_detect = False
-    vertical = 0, 0
-    horizontal = 0, 0
     left = 0
     upper = 0
     right = 0
     lower = 0
     i = 0
     j = 0
+    cut_pos = [None] * 4
     cut_arr = []
 
     #(left, *upper, right, *lower)
@@ -41,10 +40,11 @@ def transparent(image, data):
             elif i == width - 1 and row_detect == False:
                 i = 0
                 upper += 1
+                cut_pos[1] = upper
                 row_num += 1
             elif i == width - 1 and row_detect == True:
                 lower = row_num
-                vertical = upper, lower
+                cut_pos[3] = lower
                 break
                 # store the values then 
                 # reset to continue
@@ -56,7 +56,6 @@ def transparent(image, data):
     while j <= height - 1: 
         if col_num <= width - 1:
             if data[col_num + (j * width)] is not 0: 
-                print(col_num + (j * width))
                 col_num += 1
                 j = 0
                 col_detect = True
@@ -64,23 +63,22 @@ def transparent(image, data):
                 j = 0
                 col_num += 1
                 left += 1
+                cut_pos[0] = left
             elif j == height - 1 and col_detect == True:
                 right = col_num    
-                horizontal = left, right
+                cut_pos[2] = right
                 break
             else:
                 j += 1          
 
-    if right or lower is not 0:
-        # TODO: Create an array that stores the cuts
-        # does not store all values
-        cut = horizontal[0], vertical[0], horizontal[1], vertical[1]
-        cut_arr.append(cut)
+    if cut_pos is not None: # activate after every loop
+        cut_tuple = tuple(cut_pos)
+        cut_arr.append(cut_tuple)
         print(cut_arr)
-        # activate function when there is no more new values
-        #crop(cut_arr, image)
+        if i > width - 1 and j > height - 1:
+            crop(cut_arr, image)
 
-image = Image.open('test.png')
+image = Image.open('./test-images/test.png')
 pixels = image.convert('RGBA')
 data = list(pixels.getdata(3)) # Only gets Alpha Channels
 transparent(image, data)
