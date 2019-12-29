@@ -20,12 +20,12 @@ def crop(cut_arr, image):
 
 def create_tuple(left_arr, up_arr, right_arr, low_arr):
     cut_arr = list()
-    if left_arr.len() == right_arr.len() == up_arr.len() == low_arr.len():
-        for x in left_arr.len(): 
+    if len(left_arr) == len(right_arr) == len(up_arr) == len(low_arr):
+        for x in len(left_arr): 
             cut_tuple = tuple(left_arr[x], right_arr[x],
                               up_arr[x], low_arr[x])
             cut_arr.append
-            if x >= left_arr.len():
+            if x >= len(left_arr):
                 return cut_arr
     else:
         pass # TODO raise exception and print error
@@ -49,29 +49,23 @@ def transparent(image, data):
     # Used incase there are more than 1 pix gap for upper bound
 
     # Possible problem: if statement only evaluates once and never again
-    if col_num <= width - 1 and row_num <= height - 1: # does not reach, find out why
-        print('reached') 
-        arr = create_tuple(left_arr, up_arr, 
-                           right_arr, low_arr)
-        crop(arr, image)
-    else:
-        #(left, *upper, right, *lower)
-        while row_num <= height - 1:          
+    while col_num <= width - 1 and row_num <= height - 1: # does not reach, find out why
+        #(left, *upper, right, *lower)      
             if i <= width - 1:
                 if data[i + (width * row_num)] is not 0:
                     row_num += 1
-                    print("Row num is " + str(row_num))
+                    #print("Row num is " + str(row_num))
                     i = 0
                     row_detect = True
                 elif i == width - 1 and row_detect == False:
                     i = 0
                     upper += 1
                     row_num += 1
-                    print("Row num is " + str(row_num))
+                    #print("Row num is " + str(row_num))
                 elif i == width - 1 and row_detect == True:
                     lower = row_num
                     row_num += 1
-                    print("Row num is " + str(row_num))
+                    #print("Row num is " + str(row_num))
                     row_detect = False
                     i = 0
                     store(None, upper, None, lower)
@@ -80,28 +74,32 @@ def transparent(image, data):
                     i += 1
 
         #(*left, upper, *right, lower)
-        while col_num <= width - 1:
             if j <= height - 1:        
                 if data[col_num + (j * width)] is not 0: 
                     col_num += 1
-                    print("Col num is " + str(col_num))
+                    #print("Col num is " + str(col_num))
                     j = 0
                     col_detect = True
                 elif j == height - 1 and col_detect == False:
-                        j = 0
-                        col_num += 1
-                        print("Col num is " + str(col_num))
-                        left += 1
+                    j = 0
+                    col_num += 1
+                    #print("Col num is " + str(col_num))
+                    left += 1
                 elif j == height - 1 and col_detect == True:
                     right = col_num    
                     store(left, None, right, None)
                     col_detect = False
                     col_num += 1
-                    print("Col num is " + str(col_num))
+                    #print("Col num is " + str(col_num))
                     j = 0
                     continue
                 else:
-                    j += 1  
+                    j += 1
+    else:
+        print('reached') 
+        arr = create_tuple(left_arr, up_arr, 
+                           right_arr, low_arr)
+        crop(arr, image)
 
 image = Image.open('./test-images/test.png')
 pixels = image.convert('RGBA')
