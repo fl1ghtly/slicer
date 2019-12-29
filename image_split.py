@@ -21,6 +21,7 @@ def transparent(image, data):
     col_num = 0
     row_detect = False # Used incase there are more than 1 pix gap for upper bound
     col_detect = False
+    end_search = False
     left = 0
     upper = 0
     right = 0
@@ -45,10 +46,9 @@ def transparent(image, data):
             elif i == width - 1 and row_detect == True:
                 lower = row_num
                 cut_pos[3] = lower
+                row_num += 1
+                #i = 0
                 break
-                # store the values then 
-                # reset to continue
-                # will not work after first line
             else:
                 i += 1
 
@@ -67,15 +67,21 @@ def transparent(image, data):
             elif j == height - 1 and col_detect == True:
                 right = col_num    
                 cut_pos[2] = right
+                col_num += 1
+                #j = 0
+                end_search = True
                 break
             else:
                 j += 1          
 
-    if cut_pos is not None: # activate after every loop
+    if end_search: # activate after every loop
+        end_search = False
+        j = 0
+        i = 0
         cut_tuple = tuple(cut_pos)
         cut_arr.append(cut_tuple)
         print(cut_arr)
-        if i > width - 1 and j > height - 1:
+        if col_num > width - 1 and row_num > height - 1:
             crop(cut_arr, image)
 
 image = Image.open('./test-images/test.png')
