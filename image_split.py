@@ -27,7 +27,7 @@ def create_tuple(left_arr, up_arr, right_arr, low_arr):
             if x >= left_arr.len():
                 return cut_arr
     else:
-        pass # raise exception and print error
+        pass # TODO raise exception and print error
 
 def store(left, upper, right, lower):
     if left is not None:
@@ -40,7 +40,7 @@ def store(left, upper, right, lower):
         low_arr.append(lower)
     
 
-def transparent(image, data):
+def transparent(image, data): 
     # TODO define image class with these variables
     width, height = image.size
     row_num = col_num = i = j = 0
@@ -48,7 +48,7 @@ def transparent(image, data):
     row_detect = col_detect = end_search = False 
     # Used incase there are more than 1 pix gap for upper bound
 
-    if col_num > width - 1 and row_num > height - 1:
+    if col_num > width - 1 and row_num > height - 1: # does not reach, find out why
         print('reached')
         arr = create_tuple(left_arr, up_arr, 
                                right_arr, low_arr)
