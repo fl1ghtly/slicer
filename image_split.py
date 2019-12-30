@@ -1,7 +1,7 @@
 from PIL import Image
 import os
 
-left_arr = up_arr = right_arr = low_arr = []
+left_arr, up_arr, right_arr, low_arr = [], [], [], []
 
 def create_dir(dirName):
     if not os.path.exists(dirName):
@@ -11,36 +11,27 @@ def create_dir(dirName):
             print('Error creating ' + dirName)
 
 def crop(cut_arr, image):
-    create_dir('./test')
-    img_num = 1
-    for cut in cut_arr:
-        new_img = image.crop(cut)
-        new_img.save('./test' + '/result' + img_num + '.png')
-        img_num += 1
+    #create_dir('./test')
+    #img_num = 1
+    print(cut_arr)
+    #for cut in cut_arr:
+        #new_img = image.crop(cut)
+        #new_img.save('./test' + '/result' + str(img_num) + '.png')
+        #img_num += 1
 
 def create_tuple(left_arr, up_arr, right_arr, low_arr):
-    cut_arr = list()
-    if len(left_arr) == len(right_arr) == len(up_arr) == len(low_arr):
-        for x in len(left_arr): 
-            cut_tuple = tuple(left_arr[x], right_arr[x],
-                              up_arr[x], low_arr[x])
-            cut_arr.append
-            if x >= len(left_arr):
-                return cut_arr
+    cut_arr = []
+    # TODO use the last numbers if there are not enough to fill the rest of the tuples
+    # ie left = [1, 2] up = [1,2,3] 
+    # tuple = [1, 1], [2, 2], [2, 3]
+    for x in range(len(left_arr)): 
+        cut_tuple = (left_arr[x], up_arr[x], 
+                    right_arr[x], low_arr[x])
+        cut_arr.append(cut_tuple)
+        return cut_arr
     else:
         pass # TODO raise exception and print error
-
-def store(left, upper, right, lower):
-    if left is not None:
-        left_arr.append(left)
-    if upper is not None:
-        up_arr.append(upper)
-    if left is not None:
-        right_arr.append(right)
-    if left is not None:
-        low_arr.append(lower)
-    
-
+        
 def transparent(image, data): 
     width, height = image.size
     row_num = col_num = i = j = 0
@@ -48,8 +39,7 @@ def transparent(image, data):
     row_detect = col_detect = end_search = False 
     # Used incase there are more than 1 pix gap for upper bound
 
-    # Possible problem: if statement only evaluates once and never again
-    while col_num <= width - 1 and row_num <= height - 1: # does not reach, find out why
+    while col_num <= width - 1 and row_num <= height - 1:
         #(left, *upper, right, *lower)      
             if i <= width - 1:
                 if data[i + (width * row_num)] is not 0:
@@ -64,11 +54,16 @@ def transparent(image, data):
                     #print("Row num is " + str(row_num))
                 elif i == width - 1 and row_detect == True:
                     lower = row_num
+
+                    low_arr.append(lower)
+                    up_arr.append(upper)
+
+                    upper = row_num # Start new search here instead of beginning
+
                     row_num += 1
                     #print("Row num is " + str(row_num))
                     row_detect = False
                     i = 0
-                    store(None, upper, None, lower)
                     continue
                 else:
                     i += 1
@@ -87,16 +82,20 @@ def transparent(image, data):
                     left += 1
                 elif j == height - 1 and col_detect == True:
                     right = col_num    
-                    store(left, None, right, None)
-                    col_detect = False
+
+                    left_arr.append(left)
+                    right_arr.append(right)
+
+                    left = col_num
+             
                     col_num += 1
                     #print("Col num is " + str(col_num))
+                    col_detect = False
                     j = 0
                     continue
                 else:
                     j += 1
     else:
-        print('reached') 
         arr = create_tuple(left_arr, up_arr, 
                            right_arr, low_arr)
         crop(arr, image)
