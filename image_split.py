@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image, ImageOps
 import os
 
 left_arr, up_arr, right_arr, low_arr = [], [], [], []
@@ -11,14 +11,27 @@ def create_dir(dirName):
             print('Error creating ' + dirName)
 
 def crop(cut_arr, image):
-    create_dir('./test')
+    path = './' + os.path.splitext(image.filename)[0]
+    create_dir(path)
     img_num = 1
-    print(cut_arr)
     for cut in cut_arr:
-        new_img = image.crop(cut)
-        # TODO ask for user input in where to save and name
-        new_img.save('./test' + '/result' + str(img_num) + '.png')
-        img_num += 1
+        # Crops further incase there are mistakes in the cut
+        img = image.crop(cut)
+        # invert function only works with regular RGB
+        convert_img = img.convert('RGB')
+        invert = ImageOps.invert(convert_img)
+        new_img = ImageOps.invert(invert.crop(invert.getbbox()))
+
+        #Checks for blank cuts
+        if not ImageOps.invert(new_img).getbbox():
+           pass 
+        else:
+            new_img.save(path 
+                         + '/' 
+                         + os.path.splitext(image.filename)[0]
+                         + str(img_num) 
+                         + '.png')
+            img_num += 1
 
 def create_tuple(left_arr, up_arr, right_arr, low_arr):
     cut_arr = []
@@ -94,8 +107,7 @@ def transparent(image, data):
                            right_arr, low_arr)
         crop(arr, image)
 
-# TODO ask for user input for image
-image = Image.open('./test-images/test.png')
+image = Image.open(input('What image do you want to split?\n'))
 pixels = image.convert('RGBA')
 data = list(pixels.getdata(3)) # Only gets Alpha Channels
 transparent(image, data)
