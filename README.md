@@ -1,5 +1,5 @@
 # Description
-Separates images that have transparent spaces in between objects into individual .png files that only contain those objects
+This script takes an images and uses transparent pixel grids in order to seperate each object into smaller files.
 
 # Installation
 To install:
