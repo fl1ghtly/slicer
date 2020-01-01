@@ -1,5 +1,5 @@
 # Description
-This script takes an images and uses transparent pixel grids in order to seperate each object into smaller files.
+This script takes images and uses transparent pixel grids in order to seperate each object into smaller files.
 
 # Installation
 To install:
