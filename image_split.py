@@ -1,17 +1,27 @@
 from PIL import Image, ImageOps
-import os
+import os, sys
 
 left_arr, up_arr, right_arr, low_arr = [], [], [], []
+# Set default format
+img_format = '.png'
 
-def create_dir(dirName):
-    if not os.path.exists(dirName):
+def create_dir(dir_name):
+    print('Creating file directory...')
+    if not os.path.exists(dir_name):
         try:
-            os.makedirs(dirName)
+            os.makedirs(dir_name)
         except OSError:
-            print('Error creating ' + dirName)
+            print('Error creating ' + dir_name)
 
-def crop(cut_arr, image):
-    path = './' + os.path.splitext(image.filename)[0]
+def cut(cut_arr, image, img_format):
+    print('Cropping...')
+
+    # Checks if the path includes a folder or not
+    if '/' not in image.filename:
+        path = './' + os.path.splitext(image.filename)[0]
+    else:
+        path = './' + os.path.splitext(os.path.split(image.filename)[1])[0]
+
     create_dir(path)
     img_num = 1
     for cut in cut_arr:
@@ -22,20 +32,22 @@ def crop(cut_arr, image):
         invert = ImageOps.invert(convert_img)
         new_img = ImageOps.invert(invert.crop(invert.getbbox()))
 
-        #Checks for blank cuts
+        # Checks for blank cuts
         if not ImageOps.invert(new_img).getbbox():
            pass 
         else:
             new_img.save(path 
                          + '/' 
-                         + os.path.splitext(image.filename)[0]
+                         + os.path.splitext(os.path.split(image.filename)[1])[0]
                          + str(img_num) 
-                         + '.png')
+                         + img_format)
             img_num += 1
+    print('Finished!')
 
 def create_tuple(left_arr, up_arr, right_arr, low_arr):
     cut_arr = []
     vertical = 0
+    # Assigns each vertical pair with a horizontal pair 
     while vertical < len(up_arr):
         for x in range(len(left_arr)):
             cut_tuple = (left_arr[x], up_arr[vertical], 
@@ -45,14 +57,15 @@ def create_tuple(left_arr, up_arr, right_arr, low_arr):
     return cut_arr
         
 def transparent(image, data): 
+    print('Processing...')
     width, height = image.size
     row_num = col_num = i = j = 0
     left = upper = right = lower = int()
-    row_detect = col_detect = end_search = False 
     # Used incase there are more than 1 pix gap for upper bound
+    row_detect = col_detect = end_search = False 
 
     while col_num <= width - 1 and row_num <= height - 1:
-        #(left, *upper, right, *lower)      
+        # (left, *upper, right, *lower)      
             if i <= width - 1:
                 if data[i + (width * row_num)] is not 0:
                     row_num += 1
@@ -78,7 +91,7 @@ def transparent(image, data):
                 else:
                     i += 1
 
-        #(*left, upper, *right, lower)
+        # (*left, upper, *right, lower)
             if j <= height - 1:        
                 if data[col_num + (j * width)] is not 0: 
                     col_num += 1
@@ -105,9 +118,34 @@ def transparent(image, data):
     else:
         arr = create_tuple(left_arr, up_arr, 
                            right_arr, low_arr)
-        crop(arr, image)
+        cut(arr, image, img_format)
 
-image = Image.open(input('What image do you want to split?\n'))
+# Checks for valid user input and arguements
+try:
+    if len(sys.argv) > 1:
+        try:
+            image = Image.open('%s' % sys.argv[1])
+        except FileNotFoundError:
+            sys.exit('Image not found')
+
+        if len(sys.argv) > 2:
+            try:
+                if '.' not in sys.argv[2]:
+                    img_format = '.' + sys.argv[2]
+                elif sys.argv[2].find('.') == 0:
+                    img_format = sys.argv[2]
+                else:
+                    raise RuntimeError 
+            except RuntimeError:
+                sys.exit('Invalid Image Format')
+    else: 
+        raise RuntimeError
+except RuntimeError:
+    sys.exit('No commands inputted')
+except FileNotFoundError:
+    sys.exit('The file could not be found')
+
+
 pixels = image.convert('RGBA')
 data = list(pixels.getdata(3)) # Only gets Alpha Channels
 transparent(image, data)
