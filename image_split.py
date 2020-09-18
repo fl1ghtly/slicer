@@ -68,10 +68,10 @@ def transparent(image, data):
     # Used incase there are more than 1 pix gap for upper bound
     row_detect = col_detect = end_search = False
 
-    while col_num <= width - 1 and row_num <= height - 1:
+    while row_num <= height - 1:
         # (left, *upper, right, *lower)      
         if i <= width - 1:
-            if data[i + (width * row_num)] is not 0:
+            if data[i + (width * row_num)] != 0:
                 row_num += 1
                 i = 0
                 row_detect = True
@@ -86,21 +86,23 @@ def transparent(image, data):
                 up_arr.append(upper)
 
                 # Start new search here instead of the beginning
-                upper = row_num
-
                 row_num += 1
+                upper = row_num
                 row_detect = False
                 i = 0
                 continue
             else:
                 i += 1
-
+	
+    # needs to be two separate loops because of continue statement
+    while col_num <= width - 1:
         # (*left, upper, *right, lower)
         if j <= height - 1:
-            if data[col_num + (j * width)] is not 0:
+            if data[col_num + (j * width)] != 0:
                 col_num += 1
                 j = 0
                 col_detect = True
+                print('detect!')
             elif j == height - 1 and not col_detect:
                 j = 0
                 col_num += 1
@@ -110,21 +112,27 @@ def transparent(image, data):
 
                 left_arr.append(left)
                 right_arr.append(right)
-
-                left = col_num
+				
+                print('left: ', left)
 
                 col_num += 1
+                left = col_num
+				
                 col_detect = False
                 j = 0
                 continue
             else:
                 j += 1
-    else:
-        arr = create_tuple(left_arr, up_arr,
-                           right_arr, low_arr)
-        cut(arr, image, img_format)
+    
+    arr = create_tuple(left_arr, up_arr, right_arr, low_arr)
+    print('len(left_arr): ', len(left_arr))
+    print('len(up_arr): ', len(up_arr))
+    print('len(right_arr): ', len(right_arr))
+    print('len(down_arr): ', len(low_arr))
+    cut(arr, image, img_format)
 
 
+# MAIN
 # Checks for valid user input and arguments
 try:
     if len(sys.argv) > 1:
