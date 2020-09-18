@@ -22,7 +22,8 @@ def cut(cut_arr, image, img_format):
     if '/' not in image.filename:
         path = './' + os.path.splitext(image.filename)[0]
     else:
-        path = './' + os.path.splitext(os.path.split(image.filename)[1])[0]
+        path = './'
+               + os.path.splitext(os.path.split(image.filename)[1])[0]
 
     create_dir(path)
     img_num = 1
@@ -39,7 +40,8 @@ def cut(cut_arr, image, img_format):
             new_img = img.crop(alpha_channel.getbbox())
             new_img.save(path
                          + '/'
-                         + os.path.splitext(os.path.split(image.filename)[1])[0]
+                         + os.path.splitext(
+                               os.path.split(image.filename)[1])[0]
                          + str(img_num)
                          + img_format)
             img_num += 1
