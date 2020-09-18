@@ -29,15 +29,14 @@ def cut(cut_arr, image, img_format):
     for cut in cut_arr:
         # Crops further incase there are mistakes in the cut
         img = image.crop(cut)
-        # invert function only works with regular RGB
-        convert_img = img.convert('RGB')
-        invert = ImageOps.invert(convert_img)
-        new_img = ImageOps.invert(invert.crop(invert.getbbox()))
-
+        alpha_channel = img.getchannel('A')
+        bbox = alpha_channel.getbbox()
+		
         # Checks for blank cuts
-        if not ImageOps.invert(new_img).getbbox():
+        if not bbox:
             pass
         else:
+            new_img = img.crop(alpha_channel.getbbox())
             new_img.save(path
                          + '/'
                          + os.path.splitext(os.path.split(image.filename)[1])[0]
@@ -85,6 +84,8 @@ def transparent(image, data):
                 low_arr.append(lower)
                 up_arr.append(upper)
 
+                print('upper: ', upper)
+
                 # Start new search here instead of the beginning
                 row_num += 1
                 upper = row_num
@@ -102,7 +103,6 @@ def transparent(image, data):
                 col_num += 1
                 j = 0
                 col_detect = True
-                print('detect!')
             elif j == height - 1 and not col_detect:
                 j = 0
                 col_num += 1
@@ -113,11 +113,10 @@ def transparent(image, data):
                 left_arr.append(left)
                 right_arr.append(right)
 				
-                print('left: ', left)
+                print('left:  ', left)
 
                 col_num += 1
                 left = col_num
-				
                 col_detect = False
                 j = 0
                 continue
@@ -125,10 +124,6 @@ def transparent(image, data):
                 j += 1
     
     arr = create_tuple(left_arr, up_arr, right_arr, low_arr)
-    print('len(left_arr): ', len(left_arr))
-    print('len(up_arr): ', len(up_arr))
-    print('len(right_arr): ', len(right_arr))
-    print('len(down_arr): ', len(low_arr))
     cut(arr, image, img_format)
 
 
