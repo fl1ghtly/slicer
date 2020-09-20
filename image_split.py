@@ -22,14 +22,14 @@ def cut(cut_arr, image, img_format):
     if '/' not in image.filename:
         path = './' + os.path.splitext(image.filename)[0]
     else:
-        path = './'
-               + os.path.splitext(os.path.split(image.filename)[1])[0]
+        path = './' + os.path.splitext(os.path.split(image.filename)[1])[0]
 
     create_dir(path)
     img_num = 1
     for cut in cut_arr:
         # Crops further incase there are mistakes in the cut
-        img = image.crop(cut)
+        alphaver = image.convert('RGBA')
+        img = alphaver.crop(cut)
         alpha_channel = img.getchannel('A')
         bbox = alpha_channel.getbbox()
 		
@@ -155,7 +155,10 @@ except RuntimeError:
 except FileNotFoundError:
     sys.exit('The file could not be found')
 
-
+# FIXME the image crops will not work for
+# any images on the border
+# any image that is on the right or bottom 
+# of the file will not be cut
 pixels = image.convert('RGBA')
 data = list(pixels.getdata(3))  # Only gets Alpha Channels
 transparent(image, data)
