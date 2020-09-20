@@ -28,19 +28,20 @@ def cut(cut_arr, image, img_format):
     img_num = 1
     for cut in cut_arr:
         # Crops further incase there are mistakes in the cut
-        img = image.crop(cut)
-        # invert function only works with regular RGB
-        convert_img = img.convert('RGB')
-        invert = ImageOps.invert(convert_img)
-        new_img = ImageOps.invert(invert.crop(invert.getbbox()))
-
+        alphaver = image.convert('RGBA')
+        img = alphaver.crop(cut)
+        alpha_channel = img.getchannel('A')
+        bbox = alpha_channel.getbbox()
+		
         # Checks for blank cuts
-        if not ImageOps.invert(new_img).getbbox():
+        if not bbox:
             pass
         else:
+            new_img = img.crop(alpha_channel.getbbox())
             new_img.save(path
                          + '/'
-                         + os.path.splitext(os.path.split(image.filename)[1])[0]
+                         + os.path.splitext(
+                               os.path.split(image.filename)[1])[0]
                          + str(img_num)
                          + img_format)
             img_num += 1
@@ -68,10 +69,10 @@ def transparent(image, data):
     # Used incase there are more than 1 pix gap for upper bound
     row_detect = col_detect = end_search = False
 
-    while col_num <= width - 1 and row_num <= height - 1:
+    while row_num <= height - 1:
         # (left, *upper, right, *lower)      
         if i <= width - 1:
-            if data[i + (width * row_num)] is not 0:
+            if data[i + (width * row_num)] != 0:
                 row_num += 1
                 i = 0
                 row_detect = True
@@ -85,19 +86,22 @@ def transparent(image, data):
                 low_arr.append(lower)
                 up_arr.append(upper)
 
-                # Start new search here instead of the beginning
-                upper = row_num
+                print('upper: ', upper)
 
+                # Start new search here instead of the beginning
                 row_num += 1
+                upper = row_num
                 row_detect = False
                 i = 0
                 continue
             else:
                 i += 1
-
+	
+    # needs to be two separate loops because of continue statement
+    while col_num <= width - 1:
         # (*left, upper, *right, lower)
         if j <= height - 1:
-            if data[col_num + (j * width)] is not 0:
+            if data[col_num + (j * width)] != 0:
                 col_num += 1
                 j = 0
                 col_detect = True
@@ -110,21 +114,22 @@ def transparent(image, data):
 
                 left_arr.append(left)
                 right_arr.append(right)
-
-                left = col_num
+				
+                print('left:  ', left)
 
                 col_num += 1
+                left = col_num
                 col_detect = False
                 j = 0
                 continue
             else:
                 j += 1
-    else:
-        arr = create_tuple(left_arr, up_arr,
-                           right_arr, low_arr)
-        cut(arr, image, img_format)
+    
+    arr = create_tuple(left_arr, up_arr, right_arr, low_arr)
+    cut(arr, image, img_format)
 
 
+# MAIN
 # Checks for valid user input and arguments
 try:
     if len(sys.argv) > 1:
@@ -150,7 +155,10 @@ except RuntimeError:
 except FileNotFoundError:
     sys.exit('The file could not be found')
 
-
+# FIXME the image crops will not work for
+# any images on the border
+# any image that is on the right or bottom 
+# of the file will not be cut
 pixels = image.convert('RGBA')
 data = list(pixels.getdata(3))  # Only gets Alpha Channels
 transparent(image, data)
