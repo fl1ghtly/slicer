@@ -160,10 +160,15 @@ def transparent(image, data):
             else:
                 j += 1
     
-    low_arr.extend(last_low_arr)
-    up_arr.extend(last_up_arr)
-    left_arr.extend(last_left_arr)
-    right_arr.extend(last_right_arr)
+    # Stops images that are not meant to be cut
+    if len(low_arr) or len(left_arr) != 0:
+        low_arr.extend(last_low_arr)
+        up_arr.extend(last_up_arr)
+        left_arr.extend(last_left_arr)
+        right_arr.extend(last_right_arr)
+    else:
+        print('Image is not valid for cutting.')
+        sys.exit()
     
     arr = create_tuple(left_arr, up_arr, right_arr, low_arr)
     cut(arr, image, img_format)
