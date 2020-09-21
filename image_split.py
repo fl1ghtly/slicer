@@ -68,10 +68,13 @@ def transparent(image, data):
     left = upper = right = lower = int()
     # Used incase there are more than 1 pix gap for upper bound
     row_detect = col_detect = end_search = False
+    last_row = last_col = False
 
     while row_num <= height - 1:
         # (left, *upper, right, *lower)      
         if i <= width - 1:
+            # Detects non transparent pixels
+            # and skips the row.
             if data[i + (width * row_num)] != 0:
                 row_num += 1
                 i = 0
@@ -80,11 +83,31 @@ def transparent(image, data):
                 i = 0
                 upper += 1
                 row_num += 1
+
+            # Once i has reached the end of the image width
+            # and it has detected non transparent pixels
+            # it will store and remember for use later
             elif i == width - 1 and row_detect:
                 lower = row_num
 
                 low_arr.append(lower)
                 up_arr.append(upper)
+
+                # Because the last row and column
+                # are not included in the original
+                # function, we are forced to do this
+                # method instead
+                if last_row == False:
+                    # Essentially counts from bottom
+                    # to top instead of the way
+                    # the original function is doing
+                    last_low = height - upper
+                    last_up = height - lower
+
+                    low_arr.append(last_low)
+                    up_arr.append(last_up)
+
+                    last_row = True
 
                 print('upper: ', upper)
 
@@ -98,6 +121,7 @@ def transparent(image, data):
                 i += 1
 	
     # needs to be two separate loops because of continue statement
+    # all comments from previous loop still apply
     while col_num <= width - 1:
         # (*left, upper, *right, lower)
         if j <= height - 1:
@@ -115,6 +139,15 @@ def transparent(image, data):
                 left_arr.append(left)
                 right_arr.append(right)
 				
+                if last_col == False:
+                    last_left = width - right
+                    last_right = width - left
+
+                    left_arr.append(last_left)
+                    right_arr.append(last_right)
+
+                    last_col = True
+
                 print('left:  ', left)
 
                 col_num += 1
@@ -155,10 +188,6 @@ except RuntimeError:
 except FileNotFoundError:
     sys.exit('The file could not be found')
 
-# FIXME the image crops will not work for
-# any images on the border
-# any image that is on the right or bottom 
-# of the file will not be cut
 pixels = image.convert('RGBA')
 data = list(pixels.getdata(3))  # Only gets Alpha Channels
 transparent(image, data)
