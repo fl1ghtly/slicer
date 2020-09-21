@@ -103,9 +103,10 @@ def transparent(image, data):
                     # the original function is doing
                     last_low = height - upper
                     last_up = height - lower
-
-                    low_arr.append(last_low)
-                    up_arr.append(last_up)
+                    
+                    last_low_arr, last_up_arr = [], []
+                    last_low_arr.append(last_low)
+                    last_up_arr.append(last_up)
 
                     last_row = True
 
@@ -143,8 +144,9 @@ def transparent(image, data):
                     last_left = width - right
                     last_right = width - left
 
-                    left_arr.append(last_left)
-                    right_arr.append(last_right)
+                    last_left_arr, last_right_arr = [], []
+                    last_left_arr.append(last_left)
+                    last_right_arr.append(last_right)
 
                     last_col = True
 
@@ -157,6 +159,11 @@ def transparent(image, data):
                 continue
             else:
                 j += 1
+    
+    low_arr.extend(last_low_arr)
+    up_arr.extend(last_up_arr)
+    left_arr.extend(last_left_arr)
+    right_arr.extend(last_right_arr)
     
     arr = create_tuple(left_arr, up_arr, right_arr, low_arr)
     cut(arr, image, img_format)
@@ -187,6 +194,7 @@ except RuntimeError:
     sys.exit('No commands inputted')
 except FileNotFoundError:
     sys.exit('The file could not be found')
+
 
 pixels = image.convert('RGBA')
 data = list(pixels.getdata(3))  # Only gets Alpha Channels
