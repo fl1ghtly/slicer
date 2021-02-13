@@ -13,25 +13,32 @@ def create_dir(dir_name):
             print('Error creating ' + dir_name)
 
 # Finds the upper and lower bounds of the shape
-def find_bounds(coordinate_array, direction, width, height):
+def find_bounds(coord_arr, direction, width, height):
     marked_points = []
     bounds = []
 
     if direction is "Y":
         for y in range(height):
             for x in range(width):
-                if coordinate_array.get((x, y)) > 0:
-                    marked_points.append(y)
+                # Only consider points that are non transparent
+                # Do not consider points that are next to each other
+                # Only consider points that are separated by 1 transparent
+                # pixel
+                if coord_arr.get((x, y)) > 0 and coord_arr.get((x - 1, y)) == 0:
+                    # Only consider points that are near the transparent pixels
+                    if coord_arr.get((x, y - 1)) == 0 or coord_arr.get((x, y + 1)) == 0:
+                        marked_points.append(y)
     else:
         for x in range(width):
             for y in range(height):
-                if coordinate_array.get((x, y)) > 0:
-                    marked_points.append(x)
+                if coord_arr.get((x, y)) > 0 and coord_arr.get((x, y - 1)) == 0:
+                    if coord_arr.get((x - 1, y)) == 0 or coord_arr.get((x + 1, y)) == 0:
+                        marked_points.append(x)
 
-    bounds.append(min(marked_points))
-    bounds.append(max(marked_points))
+    #bounds.append(min(marked_points))
+    #bounds.append(max(marked_points))
 
-    return bounds
+    return marked_points
 
 
 # From the given point, create a coordinate pair value
@@ -88,4 +95,6 @@ width, height = image.size
 data = list(pixels.getdata(3))  # Only gets Alpha Channels
 coord_arr = create_coordinates(data, width, height)
 y_bounds = find_bounds(coord_arr, "Y", width, height)
+print(y_bounds)
 x_bounds = find_bounds(coord_arr, "X", width, height)
+print(x_bounds)
