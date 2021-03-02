@@ -12,54 +12,87 @@ def create_dir(dir_name):
         except OSError:
             print('Error creating ' + dir_name)
 
-# Finds the upper and lower bounds of the shape
-def find_bounds(coord_arr, direction, width, height):
-    marked_points = []
-    bounds = []
 
-    if direction is "Y":
-        for y in range(height):
-            for x in range(width):
-                # Only consider points that are non transparent
-                # Do not consider points that are next to each other
-                # Only consider points that are separated by 1 transparent
-                # pixel
-                if coord_arr.get((x, y)) > 0 and coord_arr.get((x - 1, y)) == 0:
-                    # Only consider points that are near the transparent pixels
-                    if coord_arr.get((x, y - 1)) == 0 or coord_arr.get((x, y + 1)) == 0:
-                        marked_points.append(y)
+# Expands the current bounds of the search by 1 in 
+# a direction (N, S, W, E)
+# bound_current is a list of the top left coordinate
+# and the bottom right coordinate of the current boundry
+# bound_current is ordered [(xleft, yleft), (xright, yright)]
+def expand(direction, bound_current):
+    # Converts point tuples into lists in order to change
+    bound_current = [list(point) for point in bound_current]
+    if direction is "N":
+        bound_current[0][1] -= 1
+    elif direction is "S":
+        bound_current[1][1] += 1
+    elif direction is "W":
+        bound_current[0][0] -= 1
     else:
-        for x in range(width):
-            for y in range(height):
-                if coord_arr.get((x, y)) > 0 and coord_arr.get((x, y - 1)) == 0:
-                    if coord_arr.get((x - 1, y)) == 0 or coord_arr.get((x + 1, y)) == 0:
-                        marked_points.append(x)
+        bound_current[1][0] += 1
 
-    #bounds.append(min(marked_points))
-    #bounds.append(max(marked_points))
+    bound_current = [tuple(point) for point in bound_current]
 
-    return marked_points
+    return bound_current
 
+# Using the direction and new bounds
+# Makes a lists of the newest included points
+# of the new boundry
+def find_difference(old_bound, new_bound, direction):
+    point_list = []
+    # New points must start at the boundry and 
+    # not (0, 0)
+    x = new_bound[0][0]
+    y = new_bound[0][1]
+    if direction is "N":
+        while x < new_bound[1][0] + 1:
+            point_list.append((x, new_bound[0][1]))
+            x += 1
+    elif direction is "S":
+        while x < new_bound[1][0] + 1:
+            point_list.append((x, new_bound[1][1]))
+            x += 1
+    elif direction is "W":
+        while y < new_bound[1][1] + 1:
+            point_list.append((new_bound[0][0], y))
+            y += 1
+    else:
+        while y < new_bound[1][1] + 1:
+            point_list.append((new_bound[1][0], y))
+            y += 1
+
+    return point_list
+
+
+# Takes in a list of coordinates to check
+# Returns False if the coord_list has any pixel 
+# that has a non zero alpha value
+# Returns True otherwise
+def check_line(coord_list):
+    for coord in coord_list:
+        if coord_dic.get(coord) > 0:
+            return False
+        else:
+            return True
 
 # From the given point, create a coordinate pair value
 # and updates the array with the pair
 def create_coordinates(data, width, height):
     # dict {(x,y) : alpha value}
-    coordinate_arr = {}
+    coordinate_dic = {}
     cur_width = 0
     cur_height = 0
 
     for point in data:
         if cur_height < height:
             if cur_width < width:
-                coordinate_arr.update({(cur_width, cur_height): point})
+                coordinate_dic.update({(cur_width, cur_height): point})
                 cur_width += 1
             else:
                 cur_width = 0
                 cur_height += 1
-                coordinate_arr.update({(cur_width, cur_height): point})
+                coordinate_dic.update({(cur_width, cur_height): point})
                 cur_width += 1
-    return coordinate_arr
+    return coordinate_dic
 
 
 
@@ -93,8 +126,5 @@ except FileNotFoundError:
 pixels = image.convert('RGBA')
 width, height = image.size
 data = list(pixels.getdata(3))  # Only gets Alpha Channels
-coord_arr = create_coordinates(data, width, height)
-y_bounds = find_bounds(coord_arr, "Y", width, height)
-print(y_bounds)
-x_bounds = find_bounds(coord_arr, "X", width, height)
-print(x_bounds)
+coord_dic = create_coordinates(data, width, height)
+#start_search(coord_dic)
