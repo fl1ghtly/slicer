@@ -21,18 +21,19 @@ def find_path():
 
 # Returns list of points in a shape
 def expand_search(point, memo):
-    if point not in memo and coord_dic.get(point) > 0:
-        memo.append(point)
+    if point not in memo and coord_dic.get(point) is not None:
+        if coord_dic.get(point) > 0:
+            memo.append(point)
 
-        # FIXME Getting values that are outside the width and height of image
-        expand_search((point[0] - 1, point[1] + 1), memo)
-        expand_search((point[0], point[1] + 1), memo)
-        expand_search((point[0] + 1, point[1] + 1), memo)
-        expand_search((point[0] - 1, point[1]), memo)
-        expand_search((point[0] + 1, point[1]), memo)
-        expand_search((point[0] - 1, point[1] - 1), memo)
-        expand_search((point[0], point[1] - 1), memo)
-        expand_search((point[0] + 1, point[1] - 1), memo)
+            # FIXME Getting values that are outside the width and height of image
+            expand_search((point[0] - 1, point[1] + 1), memo)
+            expand_search((point[0], point[1] + 1), memo)
+            expand_search((point[0] + 1, point[1] + 1), memo)
+            expand_search((point[0] - 1, point[1]), memo)
+            expand_search((point[0] + 1, point[1]), memo)
+            expand_search((point[0] - 1, point[1] - 1), memo)
+            expand_search((point[0], point[1] - 1), memo)
+            expand_search((point[0] + 1, point[1] - 1), memo)
     return memo
 
 
@@ -154,4 +155,4 @@ coord_dic = create_coordinates(data, width_img, height_img)
 start_point = find_point(width_img, height_img)
 memo_bound = []
 
-print(len(expand_search(start_point, memo_bound)))
+print(expand_search(start_point, memo_bound))
