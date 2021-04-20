@@ -19,13 +19,23 @@ def find_path():
     else:
         path = './' + os.path.splitext(os.path.split(image.filename)[1])[0]
 
+
+def save_image(bound, image, path, img_num, img_format):
+    crop_img = image.crop(bound)
+    crop_img.save(path
+                  + '/'
+                  + os.path.splitext(
+                        os.path.split(image.filename)[1])[0]
+                  + str(img_num)
+                  + img_format)
+
+
 # Returns list of points in a shape
 def expand_search(point, memo):
     if point not in memo and coord_dic.get(point) is not None:
         if coord_dic.get(point) > 0:
             memo.append(point)
 
-            # FIXME Getting values that are outside the width and height of image
             expand_search((point[0] - 1, point[1] + 1), memo)
             expand_search((point[0], point[1] + 1), memo)
             expand_search((point[0] + 1, point[1] + 1), memo)
@@ -34,50 +44,11 @@ def expand_search(point, memo):
             expand_search((point[0] - 1, point[1] - 1), memo)
             expand_search((point[0], point[1] - 1), memo)
             expand_search((point[0] + 1, point[1] - 1), memo)
+
     return memo
 
 
-# Using the direction and new bounds
-# Makes a lists of the newest included points
-# of the new boundry
-def find_difference(old_bound, new_bound, direction):
-    point_list = []
-    # New points must start at the boundry and not (0, 0)
-    x = new_bound[0][0]
-    y = new_bound[0][1]
-    if direction is "N":
-        while x < new_bound[1][0] + 1:
-            point_list.append((x, new_bound[0][1]))
-            x += 1
-    elif direction is "S":
-        while x < new_bound[1][0] + 1:
-            point_list.append((x, new_bound[1][1]))
-            x += 1
-    elif direction is "W":
-        while y < new_bound[1][1] + 1:
-            point_list.append((new_bound[0][0], y))
-            y += 1
-    else:
-        while y < new_bound[1][1] + 1:
-            point_list.append((new_bound[1][0], y))
-            y += 1
-
-    return point_list
-
-
-# Takes in a list of coordinates to check
-# Returns False if the coord_list has  
-# any pixel that has a non zero alpha value (non transparent)
-# Returns True otherwise
-def check_difference(coord_list):
-    for coord in coord_list:
-        if coord_dic.get(coord) > 0:
-            return False
-        else:
-            return True
-
-# From the given point, create a coordinate pair value
-# and updates the array with the pair
+# Creates a dictionary with a point and its associated alpha value
 def create_coordinates(data, width, height):
     # dict {(x,y) : alpha value}
     coordinate_dic = {}
@@ -107,17 +78,41 @@ def find_point(width, height):
                 point = (x,y)
                 return point
     
-    if point == None:
-        return None
+    # Point is None in this case
+    return point
 
-def save_image(bound, image, path, img_num, img_format):
-    crop_img = image.crop(bound)
-    crop_img.save(path
-                  + '/'
-                  + os.path.splitext(
-                        os.path.split(image.filename)[1])[0]
-                  + str(img_num)
-                  + img_format)
+
+def find_x_bounds(coord_list):
+    min_x = coord_list[0][0]
+    max_x = coord_list[0][0]
+
+    for point in coord_list:
+        if point[0] > max_x:
+            max_x = point[0]
+        
+        if point[0] < min_x:
+            min_x = point[0]
+    
+    return min_x, max_x
+
+
+def find_y_bounds(coord_list):
+    min_y = coord_list[0][1]
+    max_y = coord_list[0][1]
+
+    for point in coord_list:
+        if point[1] > max_y:
+            max_y = point[1]
+        
+        if point[1] < min_y:
+            min_y = point[1]
+    
+    return min_y, max_y
+
+
+def calculate_bounding_points(x_min, y_min, x_max, y_max):
+    # Top Left, Top Right, Bottom Left, Bottom Right
+    return (x_min, y_min), (x_max, y_min), (x_min, y_max), (x_max, y_max)
 
 
 # MAIN
@@ -152,7 +147,20 @@ width_img, height_img = image.size
 data = list(pixels.getdata(3))  # Only gets Alpha Channels
 coord_dic = create_coordinates(data, width_img, height_img)
 
+# TODO move into its own function
 start_point = find_point(width_img, height_img)
-memo_bound = []
+if start_point is not None:
+    memo_bound = []
 
-print(expand_search(start_point, memo_bound))
+    expand_search(start_point, memo_bound)
+
+    min_x_bound, max_x_bound = find_x_bounds(memo_bound)
+    min_y_bound, max_y_bound = find_y_bounds(memo_bound)
+
+    # FIXME the boundry will include points that are not originally in the expand_search list
+    # Must separate those points from the expand search list from the image itself, so no rogue points
+    # can be cut accidently
+    top_left, top_right, bottom_left, bottom_right = calculate_bounding_points(min_x_bound, 
+                                                                               min_y_bound, 
+                                                                               max_x_bound, 
+                                                                               max_y_bound)
