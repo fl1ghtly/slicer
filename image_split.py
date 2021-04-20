@@ -13,34 +13,35 @@ def create_dir(dir_name):
             print('Error creating ' + dir_name)
 
 
-# Expands the current bounds of the search by 1 in 
-# a direction (N, S, W, E)
-# bound_current is a list of the top left coordinate
-# and the bottom right coordinate of the current boundry
-# bound_current is ordered [(xleft, yleft), (xright, yright)]
-def expand(direction, bound_current):
-    # Converts point tuples into lists in order to change
-    bound_current = [list(point) for point in bound_current]
-    if direction is "N":
-        bound_current[0][1] -= 1
-    elif direction is "S":
-        bound_current[1][1] += 1
-    elif direction is "W":
-        bound_current[0][0] -= 1
+def find_path():
+    if '/' not in image.filename:
+        path = './' + os.path.splitext(image.filename)[0]
     else:
-        bound_current[1][0] += 1
+        path = './' + os.path.splitext(os.path.split(image.filename)[1])[0]
 
-    bound_current = [tuple(point) for point in bound_current]
+# Returns list of points in a shape
+def expand_search(point, memo):
+    if point not in memo and coord_dic.get(point) > 0:
+        memo.append(point)
 
-    return bound_current
+        # FIXME Getting values that are outside the width and height of image
+        expand_search((point[0] - 1, point[1] + 1), memo)
+        expand_search((point[0], point[1] + 1), memo)
+        expand_search((point[0] + 1, point[1] + 1), memo)
+        expand_search((point[0] - 1, point[1]), memo)
+        expand_search((point[0] + 1, point[1]), memo)
+        expand_search((point[0] - 1, point[1] - 1), memo)
+        expand_search((point[0], point[1] - 1), memo)
+        expand_search((point[0] + 1, point[1] - 1), memo)
+    return memo
+
 
 # Using the direction and new bounds
 # Makes a lists of the newest included points
 # of the new boundry
 def find_difference(old_bound, new_bound, direction):
     point_list = []
-    # New points must start at the boundry and 
-    # not (0, 0)
+    # New points must start at the boundry and not (0, 0)
     x = new_bound[0][0]
     y = new_bound[0][1]
     if direction is "N":
@@ -64,10 +65,10 @@ def find_difference(old_bound, new_bound, direction):
 
 
 # Takes in a list of coordinates to check
-# Returns False if the coord_list has any pixel 
-# that has a non zero alpha value
+# Returns False if the coord_list has  
+# any pixel that has a non zero alpha value (non transparent)
 # Returns True otherwise
-def check_line(coord_list):
+def check_difference(coord_list):
     for coord in coord_list:
         if coord_dic.get(coord) > 0:
             return False
@@ -92,8 +93,30 @@ def create_coordinates(data, width, height):
                 cur_height += 1
                 coordinate_dic.update({(cur_width, cur_height): point})
                 cur_width += 1
+    
     return coordinate_dic
 
+
+# Finds the first instance of an opaque pixel
+def find_point(width, height):
+    point = None
+    for y in range(height):
+        for x in range(width):
+            if coord_dic.get((x, y)) > 0:
+                point = (x,y)
+                return point
+    
+    if point == None:
+        return None
+
+def save_image(bound, image, path, img_num, img_format):
+    crop_img = image.crop(bound)
+    crop_img.save(path
+                  + '/'
+                  + os.path.splitext(
+                        os.path.split(image.filename)[1])[0]
+                  + str(img_num)
+                  + img_format)
 
 
 # MAIN
@@ -124,7 +147,11 @@ except FileNotFoundError:
 
 
 pixels = image.convert('RGBA')
-width, height = image.size
+width_img, height_img = image.size
 data = list(pixels.getdata(3))  # Only gets Alpha Channels
-coord_dic = create_coordinates(data, width, height)
-#start_search(coord_dic)
+coord_dic = create_coordinates(data, width_img, height_img)
+
+start_point = find_point(width_img, height_img)
+memo_bound = []
+
+print(len(expand_search(start_point, memo_bound)))
