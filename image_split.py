@@ -34,7 +34,7 @@ def save_image(bound, image, path, img_num, img_format):
 def expand_search(point, memo):
     if point not in memo and coord_dic.get(point) is not None:
         if coord_dic.get(point) > 0:
-            memo.append(point)
+            memo.add(point)
 
             expand_search((point[0] - 1, point[1] + 1), memo)
             expand_search((point[0], point[1] + 1), memo)
@@ -82,11 +82,11 @@ def find_point(width, height):
     return point
 
 
-def find_x_bounds(coord_list):
-    min_x = coord_list[0][0]
-    max_x = coord_list[0][0]
+def find_x_bounds(coord_set):
+    min_x = list(coord_set)[0][0]
+    max_x = list(coord_set)[0][0]
 
-    for point in coord_list:
+    for point in coord_set:
         if point[0] > max_x:
             max_x = point[0]
         
@@ -96,11 +96,11 @@ def find_x_bounds(coord_list):
     return min_x, max_x
 
 
-def find_y_bounds(coord_list):
-    min_y = coord_list[0][1]
-    max_y = coord_list[0][1]
+def find_y_bounds(coord_set):
+    min_y = list(coord_set)[0][1]
+    max_y = list(coord_set)[0][1]
 
-    for point in coord_list:
+    for point in coord_set:
         if point[1] > max_y:
             max_y = point[1]
         
@@ -115,7 +115,7 @@ def calculate_bounding_points(x_min, y_min, x_max, y_max):
     return (x_min, y_min), (x_max, y_min), (x_min, y_max), (x_max, y_max)
 
 
-# MAIN
+# MAIN 
 # Checks for valid user input and arguments
 try:
     if len(sys.argv) > 1:
@@ -148,18 +148,17 @@ data = list(pixels.getdata(3))  # Only gets Alpha Channels
 coord_dic = create_coordinates(data, width_img, height_img)
 
 # TODO move into its own function
+
 start_point = find_point(width_img, height_img)
 if start_point is not None:
-    memo_bound = []
+    # memo_bound is a set because lookup is O(1) instead of list O(n)
+    memo_bound = set()
 
     expand_search(start_point, memo_bound)
-
+    print(memo_bound)
     min_x_bound, max_x_bound = find_x_bounds(memo_bound)
     min_y_bound, max_y_bound = find_y_bounds(memo_bound)
 
-    # FIXME the boundry will include points that are not originally in the expand_search list
-    # Must separate those points from the expand search list from the image itself, so no rogue points
-    # can be cut accidently
     top_left, top_right, bottom_left, bottom_right = calculate_bounding_points(min_x_bound, 
                                                                                min_y_bound, 
                                                                                max_x_bound, 
