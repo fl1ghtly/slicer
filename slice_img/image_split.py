@@ -203,12 +203,16 @@ if __name__ == '__main__':
     filepath = find_path(orig_image)
 
     #create_dir(filepath)
+    
+    img_count = 1
 
-    # TODO loop until image is done
     start_point = find_point(width_img, height_img, coord_dic)
-    if start_point is not None:
-        slice_image(1)
-    else:
-        # Image is done splitting
-        pass
+
+    # TODO remove already done slices
+    while start_point is not None:
+        slice_image(img_count)
+        img_count += 1
+        start_point = find_point(width_img, height_img, coord_dic)
+
+    print('Finished!')
 
