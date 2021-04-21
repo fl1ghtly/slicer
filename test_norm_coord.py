@@ -24,14 +24,11 @@ class TestNormCoord(unittest.TestCase):
         self.right_5 = (5, 5)
         self.set_5 = {(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), 
                       (5, 1), (5, 2), (5, 3), (5, 4), (5, 5)}
-
-    def test_norm_coord_left(self):
-        self.assertEqual(normalize_coordinates(self.left_1, self.right_1, self.set_1)[0], (0, 0))
-        self.assertEqual(normalize_coordinates(self.left_2, self.right_2, self.set_2)[0], (0, 0))
-        self.assertEqual(normalize_coordinates(self.left_3, self.right_3, self.set_3)[0], (0, 0))
-        self.assertEqual(normalize_coordinates(self.left_4, self.right_4, self.set_4)[0], (0, 0))
-        self.assertEqual(normalize_coordinates(self.left_5, self.right_5, self.set_5)[0], (0, 0))
     
+    # TODO test transform dict
+    def test_norm_coord_transform(self):
+        pass
+
     def test_norm_coord_right(self):
         self.assertEqual(normalize_coordinates(self.left_1, self.right_1, self.set_1)[1], (1, 1))
         self.assertEqual(normalize_coordinates(self.left_2, self.right_2, self.set_2)[1], (3, 2))
@@ -40,7 +37,6 @@ class TestNormCoord(unittest.TestCase):
         self.assertEqual(normalize_coordinates(self.left_5, self.right_5, self.set_5)[1], (5, 5))
 
     def test_norm_coord_set(self):
-        # TODO add set of coord
         self.assertEqual(normalize_coordinates(self.left_1, self.right_1, self.set_1)[2], 
                                                {(0, 0), (1, 0), (0, 1), (1, 1)})
         self.assertEqual(normalize_coordinates(self.left_2, self.right_2, self.set_2)[2], 
