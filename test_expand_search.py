@@ -1,7 +1,7 @@
 import unittest
-import image_split
+from image_split import expand_search
 
-class TestImageSplit(unittest.TestCase):
+class TestExpandSearch(unittest.TestCase):
     def setUp(self):
         self.coord_dict_1 = {(0, 0): 0, (1, 0): 0, (2, 0): 0, (3, 0): 0, 
                              (0, 1): 0, (1, 1): 255, (2, 1): 255, (3, 1): 0, 
@@ -55,16 +55,16 @@ class TestImageSplit(unittest.TestCase):
         self.memo_5 = set()
 
     def test_expand_search(self):
-        self.assertEqual(image_split.expand_search(self.start_point_1, self.memo_1, self.coord_dict_1), 
+        self.assertEqual(expand_search(self.start_point_1, self.memo_1, self.coord_dict_1), 
                                                    {(1, 1), (1, 2), (2, 1), (2, 2)})
-        self.assertEqual(image_split.expand_search(self.start_point_2, self.memo_2, self.coord_dict_2), 
+        self.assertEqual(expand_search(self.start_point_2, self.memo_2, self.coord_dict_2), 
                                                    {(1, 1), (2, 1), (3, 1), (4, 1), (1, 2), (2, 2), 
                                                     (3, 2), (4, 2), (1, 3), (2, 3), (3, 3), (4, 3)})
-        self.assertEqual(image_split.expand_search(self.start_point_3, self.memo_3, self.coord_dict_3), 
+        self.assertEqual(expand_search(self.start_point_3, self.memo_3, self.coord_dict_3), 
                                                    {(1, 1), (2, 1), (1, 2), (2, 2), (1, 3), (2, 3)})
-        self.assertEqual(image_split.expand_search(self.start_point_4, self.memo_4, self.coord_dict_4), 
+        self.assertEqual(expand_search(self.start_point_4, self.memo_4, self.coord_dict_4), 
                                                    {(1, 2), (2, 3), (3, 4), (4, 3), (5, 2)})
-        self.assertEqual(image_split.expand_search(self.start_point_5, self.memo_5, self.coord_dict_5), 
+        self.assertEqual(expand_search(self.start_point_5, self.memo_5, self.coord_dict_5), 
                                                    {(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), 
                                                     (5, 1), (5, 2), (5, 3), (5, 4), (5, 5)})
 

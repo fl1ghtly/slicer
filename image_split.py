@@ -29,6 +29,9 @@ def save_image(bound, image, path, img_num, img_format):
                   + str(img_num)
                   + img_format)
 
+def create_new_image():
+    pass
+
 
 # Returns list of points in a shape
 def expand_search(point, memo, coord_dictionary):
@@ -36,6 +39,7 @@ def expand_search(point, memo, coord_dictionary):
         if coord_dictionary.get(point) > 0:
             memo.add(point)
 
+            # Searches surrounding points
             expand_search((point[0] - 1, point[1] + 1), memo, coord_dictionary)
             expand_search((point[0], point[1] + 1), memo, coord_dictionary)
             expand_search((point[0] + 1, point[1] + 1), memo, coord_dictionary)
@@ -67,6 +71,26 @@ def create_coordinates(data, width, height):
                 cur_width += 1
     
     return coordinate_dic
+
+
+# Transforms coordinate position to have their starting position at (0, 0)
+def normalize_coordinates(top_left_bound, bottom_right_bound, set_of_coords):
+    # FIXME might not work for images that are bigger on one side than the other
+    new_set = set()
+
+    x_transform = top_left_bound[0]
+    y_transform = top_left_bound[1]
+
+    new_top_left = (0, 0)
+    new_bottom_right = [bottom_right_bound[0], bottom_right_bound[1]]
+
+    new_bottom_right[0] -= x_transform 
+    new_bottom_right[1] -= y_transform 
+
+    for coord in set_of_coords:
+        new_set.add((coord[0] - x_transform, coord[1] - y_transform))
+
+    return new_top_left, tuple(new_bottom_right), new_set
 
 
 # Finds the first instance of an opaque pixel
@@ -164,3 +188,6 @@ if start_point is not None:
                                                                                min_y_bound, 
                                                                                max_x_bound, 
                                                                                max_y_bound)
+    
+    new_top_left, new_bottom_right, new_memo = normalize_coordinates(top_left, bottom_right, memo_bound)
+
