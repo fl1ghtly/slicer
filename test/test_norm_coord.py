@@ -1,5 +1,5 @@
 import unittest
-from image_split import normalize_coordinates
+from slice_img.image_split import normalize_coordinates
 
 class TestNormCoord(unittest.TestCase):
     def setUp(self):

@@ -1,5 +1,5 @@
 import unittest
-from image_split import expand_search
+from slice_img.image_split import expand_search
 
 class TestExpandSearch(unittest.TestCase):
     def setUp(self):
