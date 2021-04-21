@@ -31,19 +31,19 @@ def save_image(bound, image, path, img_num, img_format):
 
 
 # Returns list of points in a shape
-def expand_search(point, memo):
-    if point not in memo and coord_dic.get(point) is not None:
-        if coord_dic.get(point) > 0:
+def expand_search(point, memo, coord_dictionary):
+    if point not in memo and coord_dictionary.get(point) is not None:
+        if coord_dictionary.get(point) > 0:
             memo.add(point)
 
-            expand_search((point[0] - 1, point[1] + 1), memo)
-            expand_search((point[0], point[1] + 1), memo)
-            expand_search((point[0] + 1, point[1] + 1), memo)
-            expand_search((point[0] - 1, point[1]), memo)
-            expand_search((point[0] + 1, point[1]), memo)
-            expand_search((point[0] - 1, point[1] - 1), memo)
-            expand_search((point[0], point[1] - 1), memo)
-            expand_search((point[0] + 1, point[1] - 1), memo)
+            expand_search((point[0] - 1, point[1] + 1), memo, coord_dictionary)
+            expand_search((point[0], point[1] + 1), memo, coord_dictionary)
+            expand_search((point[0] + 1, point[1] + 1), memo, coord_dictionary)
+            expand_search((point[0] - 1, point[1]), memo, coord_dictionary)
+            expand_search((point[0] + 1, point[1]), memo, coord_dictionary)
+            expand_search((point[0] - 1, point[1] - 1), memo, coord_dictionary)
+            expand_search((point[0], point[1] - 1), memo, coord_dictionary)
+            expand_search((point[0] + 1, point[1] - 1), memo, coord_dictionary)
 
     return memo
 
@@ -70,11 +70,11 @@ def create_coordinates(data, width, height):
 
 
 # Finds the first instance of an opaque pixel
-def find_point(width, height):
+def find_point(width, height, coord_dictionary):
     point = None
     for y in range(height):
         for x in range(width):
-            if coord_dic.get((x, y)) > 0:
+            if coord_dictionary.get((x, y)) > 0:
                 point = (x,y)
                 return point
     
@@ -149,13 +149,14 @@ coord_dic = create_coordinates(data, width_img, height_img)
 
 # TODO move into its own function
 
-start_point = find_point(width_img, height_img)
+start_point = find_point(width_img, height_img, coord_dic)
+
 if start_point is not None:
     # memo_bound is a set because lookup is O(1) instead of list O(n)
     memo_bound = set()
 
-    expand_search(start_point, memo_bound)
-    print(memo_bound)
+    expand_search(start_point, memo_bound, coord_dic)
+    
     min_x_bound, max_x_bound = find_x_bounds(memo_bound)
     min_y_bound, max_y_bound = find_y_bounds(memo_bound)
 
