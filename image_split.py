@@ -20,8 +20,8 @@ def find_path(img):
     return path
 
 
-def save_image(img, path, img_num, img_format):
-    img.save(path
+def save_image(img, img_num):
+    img.save(filepath
                + '/'
                + os.path.splitext(
                  os.path.split(img.filename)[1])[0]
@@ -145,28 +145,25 @@ def calculate_bounding_points(x_min, y_min, x_max, y_max):
 
 
 def slice_image(img_num):
-    start_point = find_point(width_img, height_img, coord_dic)
+    # memo_bound is a set because lookup is O(1) instead of list O(n)
+    memo_bound = set()
 
-    if start_point is not None:
-        # memo_bound is a set because lookup is O(1) instead of list O(n)
-        memo_bound = set()
+    expand_search(start_point, memo_bound, coord_dic)
+    
+    min_x_bound, max_x_bound = find_x_bounds(memo_bound)
+    min_y_bound, max_y_bound = find_y_bounds(memo_bound)
 
-        expand_search(start_point, memo_bound, coord_dic)
-        
-        min_x_bound, max_x_bound = find_x_bounds(memo_bound)
-        min_y_bound, max_y_bound = find_y_bounds(memo_bound)
-
-        top_left, bottom_right = calculate_bounding_points(min_x_bound, 
-                                                           min_y_bound, 
-                                                           max_x_bound, 
-                                                           max_y_bound)
-        
-        translation_map, norm_bottom_right, norm_coords = normalize_coordinates(top_left, 
-                                                                                bottom_right, 
-                                                                                memo_bound)
-        
-        img_slice = create_new_image(norm_bottom_right, norm_coords, translation_map, orig_image)
-        #save_image(img_slice, filepath, img_num, img_format)
+    top_left, bottom_right = calculate_bounding_points(min_x_bound, 
+                                                        min_y_bound, 
+                                                        max_x_bound, 
+                                                        max_y_bound)
+    
+    translation_map, norm_bottom_right, norm_coords = normalize_coordinates(top_left, 
+                                                                            bottom_right, 
+                                                                            memo_bound)
+    
+    img_slice = create_new_image(norm_bottom_right, norm_coords, translation_map, orig_image)
+    #save_image(img_slice, img_num)
 
 
 # MAIN 
@@ -204,8 +201,13 @@ width_img, height_img = orig_image.size
 coord_dic = create_coordinates(data, width_img, height_img)
 filepath = find_path(orig_image)
 
-create_dir(filepath)
+#create_dir(filepath)
 
 # TODO loop until image is done
-slice_image(1)
+start_point = find_point(width_img, height_img, coord_dic)
+if start_point is not None:
+    slice_image(1)
+else:
+    # Image is done splitting
+    pass
 
