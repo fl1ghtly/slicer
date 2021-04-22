@@ -7,38 +7,28 @@ To install:
 cd {main folder}
 pip install -r requirements.txt
 ```
-Main folder is the directory to image-split
+Main folder is the directory to slicer
 
 # Usage
 ```
 cd {main folder}
-python image_split.py {image file} {format}
+python {path to image_split.py} {image file} {format}
 ```
 
 # Examples
 Uses test.png and outputs in default png format
 ```
-python image_split.py test.png
-```
-
-Use this format to specify a folder inside the main folder
-```
-python image_split.py ./test-images/test.png
-```
-
-Use this format to specify a folder path instead
-```
-python image_split.py C:/Users/{user}/test-images/test.png
+python ./slice_img/image_split.py ./test-images/test1.png
 ```
 
 To specify a different format, type the format like below
 ```
-python image_split.py test.png jpg
+python ./slice_img/image_split.py ./test-images/test1.png jpg
 ```
 
 This format works too
 ```
-python image_split.py test.png .jpg
+python ./slice_img/image_split.py ./test-images/test1.png .jpg
 ```
 
 
