@@ -24,15 +24,15 @@ def save_image(img, img_num):
     img.save(filepath
                + '/'
                + os.path.splitext(
-                 os.path.split(img.filename)[1])[0]
+                 os.path.split(orig_image.filename)[1])[0]
                + str(img_num)
                + img_format)
 
 
-def create_new_image(bottom_right_pt, new_coords, transform, original_image):
+def create_new_image(bottom_right_pt, new_coords, transform, image):
     im = Image.new('RGBA', (bottom_right_pt[0] + 1, bottom_right_pt[1] + 1), (0, 0, 0, 0))
     for point in new_coords:
-        im.putpixel(point, original_image.getpixel(transform.get(point)))
+        im.putpixel(point, image.getpixel(transform.get(point)))
     return im
 
 
@@ -144,6 +144,10 @@ def calculate_bounding_points(x_min, y_min, x_max, y_max):
     return (x_min, y_min), (x_max, y_max)
 
 
+def remove_points(coord_list, coord_dict):
+    for point in coord_list:
+        coord_dict.update({point: 0})
+
 def slice_image(img_num):
     # memo_bound is a set because lookup is O(1) instead of list O(n)
     memo_bound = set()
@@ -162,8 +166,9 @@ def slice_image(img_num):
                                                                             bottom_right, 
                                                                             memo_bound)
     
-    img_slice = create_new_image(norm_bottom_right, norm_coords, translation_map, orig_image)
-    #save_image(img_slice, img_num)
+    img_slice = create_new_image(norm_bottom_right, norm_coords, translation_map, pixels)
+    save_image(img_slice, img_num)
+    remove_points(memo_bound, coord_dic)
 
 
 # MAIN 
@@ -193,7 +198,6 @@ if __name__ == '__main__':
     except FileNotFoundError:
         sys.exit('The file could not be found')
 
-
     pixels = orig_image.convert('RGBA')
     data = list(pixels.getdata(3))  
 
@@ -202,17 +206,14 @@ if __name__ == '__main__':
     coord_dic = create_coordinates(data, width_img, height_img)
     filepath = find_path(orig_image)
 
-    #create_dir(filepath)
-    
+    create_dir(filepath)
     img_count = 1
 
     start_point = find_point(width_img, height_img, coord_dic)
 
-    # TODO remove already done slices
     while start_point is not None:
         slice_image(img_count)
         img_count += 1
         start_point = find_point(width_img, height_img, coord_dic)
 
-    print('Finished!')
 
