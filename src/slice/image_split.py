@@ -21,11 +21,11 @@ def find_path(img):
     return path
 
 
-def save_image(img, img_num):
-    img.save(filepath
+def save_image(new_img, original_img, img_num, path, ):
+    new_img.save(path
                + '/'
                + os.path.splitext(
-                 os.path.split(orig_image.filename)[1])[0]
+                 os.path.split(original_img.filename)[1])[0]
                + str(img_num)
                + img_format)
 
@@ -149,11 +149,11 @@ def remove_points(coord_list, coord_dict):
     for point in coord_list:
         coord_dict.update({point: 0})
 
-def slice_image(img_num):
+def slice_image(img_num, start, coord_map, converted_image, original_image, path):
     # memo_bound is a set because lookup is O(1) instead of list O(n)
     memo_bound = set()
 
-    expand_search(start_point, memo_bound, coord_dic)
+    expand_search(start, memo_bound, coord_map)
     
     min_x_bound, max_x_bound = find_x_bounds(memo_bound)
     min_y_bound, max_y_bound = find_y_bounds(memo_bound)
@@ -167,14 +167,13 @@ def slice_image(img_num):
                                                                             bottom_right, 
                                                                             memo_bound)
     
-    img_slice = create_new_image(norm_bottom_right, norm_coords, translation_map, pixels)
-    save_image(img_slice, img_num)
-    remove_points(memo_bound, coord_dic)
+    img_slice = create_new_image(norm_bottom_right, norm_coords, translation_map, converted_image)
+    save_image(img_slice, original_image, img_num, path)
+    remove_points(memo_bound, coord_map)
 
 
-# MAIN 
-# Checks for valid user input and arguments
-if __name__ == '__main__':
+def start_slice():
+    # Checks for valid user input and arguments
     try:
         if len(sys.argv) > 1:
             try:
@@ -215,8 +214,12 @@ if __name__ == '__main__':
     start_point = find_point(width_img, height_img, coord_dic)
 
     while start_point is not None:
-        slice_image(img_count)
+        slice_image(img_count, start_point, coord_dic, pixels, orig_image, filepath)
         img_count += 1
         start_point = find_point(width_img, height_img, coord_dic)
 
-print("Finished!")
+    print("Finished!")
+
+
+if __name__ == '__main__':
+    start_slice()
