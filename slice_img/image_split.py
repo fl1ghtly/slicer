@@ -5,6 +5,7 @@ import os, sys
 img_format = '.png'
 
 def create_dir(dir_name):
+    print("Making Directory...")
     if not os.path.exists(dir_name):
         try:
             os.makedirs(dir_name)
@@ -57,6 +58,7 @@ def expand_search(point, memo, coord_dictionary):
 
 # Creates a dictionary with a point and its associated alpha value
 def create_coordinates(data, width, height):
+    print("Mapping Coordinates...")
     # dict {(x,y) : alpha value}
     coordinate_dic = {}
     cur_width = 0
@@ -78,7 +80,6 @@ def create_coordinates(data, width, height):
 
 # Transforms coordinate position to have their starting position at (0, 0)
 def normalize_coordinates(top_left_bound, bottom_right_bound, set_of_coords):
-    # FIXME might not work for images that are bigger on one side than the other
     new_set = set()
     transform_map = {}
 
@@ -177,6 +178,7 @@ if __name__ == '__main__':
     try:
         if len(sys.argv) > 1:
             try:
+                print("Starting...")
                 orig_image = Image.open('%s' % sys.argv[1])
             except FileNotFoundError:
                 sys.exit('Image not found')
@@ -209,6 +211,7 @@ if __name__ == '__main__':
     create_dir(filepath)
     img_count = 1
 
+    print("Starting Slice...")
     start_point = find_point(width_img, height_img, coord_dic)
 
     while start_point is not None:
@@ -216,4 +219,4 @@ if __name__ == '__main__':
         img_count += 1
         start_point = find_point(width_img, height_img, coord_dic)
 
-
+print("Finished!")
