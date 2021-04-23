@@ -10,7 +10,7 @@ pip install Pillow==8.1.1
 # Installation
 To install:
 ```
-pip install slicer
+pip install slicer-img
 ```
 
 # Usage
