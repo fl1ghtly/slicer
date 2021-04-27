@@ -5,9 +5,9 @@
 This script takes images and uses transparent pixel grids in order to seperate each object into smaller files. A test image is included in order to see how this script works.
 
 # Requirements
-This package needs Pillow 8.1.1 which can be done through:
+This package needs Pillow which can be done through:
 ```
-pip install Pillow==8.1.1
+pip install Pillow
 ```
 
 # Installation
