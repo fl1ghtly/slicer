@@ -1,6 +1,6 @@
 from PIL import Image, ImageOps
-import os, sys
 from queue import LifoQueue
+import os, sys
 
 # Set default format
 img_format = '.png'
@@ -59,24 +59,6 @@ def expand_search(point, memo, coord_dictionary):
 
     return memo
 
-
-    '''
-    if point not in memo and coord_dictionary.get(point) is not None:
-        if coord_dictionary.get(point) > 0:
-            memo.add(point)
-
-            # Searches surrounding points
-            expand_search((point[0] - 1, point[1] + 1), memo, coord_dictionary)
-            expand_search((point[0], point[1] + 1), memo, coord_dictionary)
-            expand_search((point[0] + 1, point[1] + 1), memo, coord_dictionary)
-            expand_search((point[0] - 1, point[1]), memo, coord_dictionary)
-            expand_search((point[0] + 1, point[1]), memo, coord_dictionary)
-            expand_search((point[0] - 1, point[1] - 1), memo, coord_dictionary)
-            expand_search((point[0], point[1] - 1), memo, coord_dictionary)
-            expand_search((point[0] + 1, point[1] - 1), memo, coord_dictionary)
-
-    return memo
-    '''
 
 # Creates a dictionary with a point and its associated alpha value
 def create_coordinates(data, width, height):
