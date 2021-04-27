@@ -1,5 +1,6 @@
 from PIL import Image, ImageOps
 import os, sys
+from queue import LifoQueue
 
 # Set default format
 img_format = '.png'
@@ -39,6 +40,27 @@ def create_new_image(bottom_right_pt, new_coords, transform, image):
 
 # Returns list of points in a shape
 def expand_search(point, memo, coord_dictionary):
+    stack = LifoQueue()
+    stack.put(point)
+    while(not stack.empty()):
+        point = stack.get(point)
+
+        relative_pts = [(point[0] - 1, point[1] + 1), (point[0], point[1] + 1),
+                        (point[0] + 1, point[1] + 1), (point[0] - 1, point[1]),
+                        (point[0] + 1, point[1]), (point[0] - 1, point[1] - 1),
+                        (point[0], point[1] - 1), (point[0] + 1, point[1] - 1)]
+
+        memo.add(point)
+        coord_dictionary.update({point: 0})
+        for i in range(8):
+            if relative_pts[i] not in memo and coord_dictionary.get(relative_pts[i]) is not None:
+                if coord_dictionary.get(relative_pts[i]) > 0:
+                    stack.put(relative_pts[i])
+
+    return memo
+
+
+    '''
     if point not in memo and coord_dictionary.get(point) is not None:
         if coord_dictionary.get(point) > 0:
             memo.add(point)
@@ -54,7 +76,7 @@ def expand_search(point, memo, coord_dictionary):
             expand_search((point[0] + 1, point[1] - 1), memo, coord_dictionary)
 
     return memo
-
+    '''
 
 # Creates a dictionary with a point and its associated alpha value
 def create_coordinates(data, width, height):
