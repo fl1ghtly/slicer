@@ -5,9 +5,8 @@ import sys
 import time
 import itertools
 import threading
+import argparse
 
-# Set default format
-img_format = '.png'
 
 def create_dir(dir_name):
     print("Making Directory...")
@@ -26,7 +25,7 @@ def find_path(img):
     return path
 
 
-def save_image(new_img, original_img, img_num, path, ):
+def save_image(new_img, original_img, img_num, path, img_format):
     new_img.save(path
                + '/'
                + os.path.splitext(
@@ -35,8 +34,27 @@ def save_image(new_img, original_img, img_num, path, ):
                + img_format)
 
 
-def create_new_image(bottom_right_pt, new_coords, transform, image):
-    im = Image.new('RGBA', (bottom_right_pt[0] + 1, bottom_right_pt[1] + 1), (0, 0, 0, 0))
+# Repeatedly shows ... in sequence 
+def show_progress():
+    progress_thread = threading.currentThread()
+    load_str = ''
+    while getattr(progress_thread, "is_loading", True):
+        if len(load_str) >= 3:
+            load_str = ''
+            # Clears last printed line
+            sys.stdout.write("\033[K")
+        else:
+            load_str += '.'
+        print(load_str, end='\r')
+        time.sleep(0.2)
+
+
+def create_new_image(bottom_right_pt, new_coords, transform, image, img_format):
+    channel = 'RGBA'
+    if img_format == '.jpg':
+        channel = 'RGB'
+
+    im = Image.new(channel, (bottom_right_pt[0] + 1, bottom_right_pt[1] + 1), (0, 0, 0, 0))
     for point in new_coords:
         im.putpixel(point, image.getpixel(transform.get(point)))
     return im
@@ -157,7 +175,8 @@ def remove_points(coord_list, coord_dict):
     for point in coord_list:
         coord_dict.update({point: 0})
 
-def slice_image(img_num, start, coord_map, converted_image, original_image, path):
+
+def slice_image(img_num, start, coord_map, converted_image, original_image, path, img_format):
     # memo_bound is a set because lookup is O(1) instead of list O(n)
     memo_bound = set()
 
@@ -178,33 +197,36 @@ def slice_image(img_num, start, coord_map, converted_image, original_image, path
                                                                             bottom_right, 
                                                                             memo_bound)
     
-    img_slice = create_new_image(norm_bottom_right, norm_coords, translation_map, converted_image)
-    save_image(img_slice, original_image, img_num, path)
+    img_slice = create_new_image(norm_bottom_right, norm_coords, translation_map, converted_image, img_format)
+    save_image(img_slice, original_image, img_num, path, img_format)
     remove_points(memo_bound, coord_map)
 
 
 def start_slice():
     # Checks for valid user input and arguments
-    try:
-        if len(sys.argv) > 1:
-            try:
-                print("Starting...")
-                orig_image = Image.open('%s' % sys.argv[1])
-            except FileNotFoundError:
-                sys.exit('Image not found')
+    parser = argparse.ArgumentParser(description='Slices clusters of pixels into separate images')
+    parser.add_argument('image', metavar='i', type=str, help='Path to image. Must include file extension')
+    parser.add_argument('-t', help='What file type each image should be saved as', nargs='?', const='.png')
+    args = parser.parse_args()
 
-            if len(sys.argv) > 2:
-                try:
-                    if '.' not in sys.argv[2]:
-                        img_format = '.' + sys.argv[2]
-                    elif sys.argv[2].find('.') == 0:
-                        img_format = sys.argv[2]
-                    else:
-                        raise RuntimeError
-                except RuntimeError:
-                    sys.exit('Invalid Image Format')
-        else:
-            raise RuntimeError
+    # Sets Default image format
+    img_format = args.t
+
+    try:
+        try:
+            orig_image = Image.open('%s' % args.image)
+            print("Starting...")
+        except FileNotFoundError:
+            sys.exit('Image not found')
+        try:
+            if '.' not in args.t:
+                img_format = '.' + args.t
+            elif args.t.find('.') == 0:
+                img_format = args.t
+            else:
+                raise RuntimeError
+        except RuntimeError:
+            sys.exit('Invalid Image Format')
     except RuntimeError:
         sys.exit('No commands inputted')
     except FileNotFoundError:
@@ -225,24 +247,11 @@ def start_slice():
     start_point = find_point(width_img, height_img, coord_dic)
 
     while start_point is not None:
-        slice_image(img_count, start_point, coord_dic, pixels, orig_image, filepath)
+        slice_image(img_count, start_point, coord_dic, pixels, orig_image, filepath, img_format)
         img_count += 1
         start_point = find_point(width_img, height_img, coord_dic)
 
     print("Finished!")
-
-
-def show_progress():
-    progress_thread = threading.currentThread()
-    load_str = ''
-    while getattr(progress_thread, "is_loading", True):
-        if len(load_str) >= 3:
-            load_str = ''
-            sys.stdout.write("\033[K")
-        else:
-            load_str += '.'
-        print(load_str, end='\r')
-        time.sleep(0.2)
 
 
 if __name__ == '__main__':
