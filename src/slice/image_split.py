@@ -211,7 +211,7 @@ def start_slice():
     parser.add_argument('image', metavar='i', type=str,
                         help='Path to image. Must include file extension')
     parser.add_argument(
-        '-t', help='What file type each image should be saved as', nargs='?', const='.png')
+        '-t', help='What file type each image should be saved as', nargs='?', default='.png')
     args = parser.parse_args()
 
     # Sets Default image format
