@@ -8,7 +8,7 @@ with open('requirements.txt') as f:
 	
 setuptools.setup(
     name="slicer-img",
-    version="2.0.1",
+    version="2.1.0",
     author="James Nguyen",
     description="Slices an image into its constituent parts",
     long_description=long_description,
