@@ -1,6 +1,6 @@
 from PIL import Image, ImageOps
 from queue import LifoQueue
-import os 
+import os
 import sys
 import time
 import itertools
@@ -27,14 +27,14 @@ def find_path(img):
 
 def save_image(new_img, original_img, img_num, path, img_format):
     new_img.save(path
-               + '/'
-               + os.path.splitext(
-                 os.path.split(original_img.filename)[1])[0]
-               + str(img_num)
-               + img_format)
+                 + '/'
+                 + os.path.splitext(
+                     os.path.split(original_img.filename)[1])[0]
+                 + str(img_num)
+                 + img_format)
 
 
-# Repeatedly shows ... in sequence 
+# Repeatedly shows ... in sequence
 def show_progress():
     progress_thread = threading.currentThread()
     load_str = ''
@@ -54,7 +54,8 @@ def create_new_image(bottom_right_pt, new_coords, transform, image, img_format):
     if img_format == '.jpg':
         channel = 'RGB'
 
-    im = Image.new(channel, (bottom_right_pt[0] + 1, bottom_right_pt[1] + 1), (0, 0, 0, 0))
+    im = Image.new(
+        channel, (bottom_right_pt[0] + 1, bottom_right_pt[1] + 1), (0, 0, 0, 0))
     for point in new_coords:
         im.putpixel(point, image.getpixel(transform.get(point)))
     return im
@@ -100,7 +101,7 @@ def create_coordinates(data, width, height):
                 cur_height += 1
                 coordinate_dic.update({(cur_width, cur_height): point})
                 cur_width += 1
-    
+
     return coordinate_dic
 
 
@@ -114,8 +115,8 @@ def normalize_coordinates(top_left_bound, bottom_right_bound, set_of_coords):
 
     new_bottom_right = [bottom_right_bound[0], bottom_right_bound[1]]
 
-    new_bottom_right[0] -= x_transform 
-    new_bottom_right[1] -= y_transform 
+    new_bottom_right[0] -= x_transform
+    new_bottom_right[1] -= y_transform
 
     for coord in set_of_coords:
         new_coord = (coord[0] - x_transform, coord[1] - y_transform)
@@ -131,9 +132,9 @@ def find_point(width, height, coord_dictionary):
     for y in range(height):
         for x in range(width):
             if coord_dictionary.get((x, y)) > 0:
-                point = (x,y)
+                point = (x, y)
                 return point
-    
+
     # Point is None in this case
     return point
 
@@ -145,10 +146,10 @@ def find_x_bounds(coord_set):
     for point in coord_set:
         if point[0] > max_x:
             max_x = point[0]
-        
+
         if point[0] < min_x:
             min_x = point[0]
-    
+
     return min_x, max_x
 
 
@@ -159,10 +160,10 @@ def find_y_bounds(coord_set):
     for point in coord_set:
         if point[1] > max_y:
             max_y = point[1]
-        
+
         if point[1] < min_y:
             min_y = point[1]
-    
+
     return min_y, max_y
 
 
@@ -184,29 +185,33 @@ def slice_image(img_num, start, coord_map, converted_image, original_image, path
     thread.start()
     expand_search(start, memo_bound, coord_map)
     thread.is_loading = False
-    
+
     min_x_bound, max_x_bound = find_x_bounds(memo_bound)
     min_y_bound, max_y_bound = find_y_bounds(memo_bound)
 
-    top_left, bottom_right = calculate_bounding_points(min_x_bound, 
-                                                        min_y_bound, 
-                                                        max_x_bound, 
-                                                        max_y_bound)
-    
-    translation_map, norm_bottom_right, norm_coords = normalize_coordinates(top_left, 
-                                                                            bottom_right, 
+    top_left, bottom_right = calculate_bounding_points(min_x_bound,
+                                                       min_y_bound,
+                                                       max_x_bound,
+                                                       max_y_bound)
+
+    translation_map, norm_bottom_right, norm_coords = normalize_coordinates(top_left,
+                                                                            bottom_right,
                                                                             memo_bound)
-    
-    img_slice = create_new_image(norm_bottom_right, norm_coords, translation_map, converted_image, img_format)
+
+    img_slice = create_new_image(
+        norm_bottom_right, norm_coords, translation_map, converted_image, img_format)
     save_image(img_slice, original_image, img_num, path, img_format)
     remove_points(memo_bound, coord_map)
 
 
 def start_slice():
     # Checks for valid user input and arguments
-    parser = argparse.ArgumentParser(description='Slices clusters of pixels into separate images')
-    parser.add_argument('image', metavar='i', type=str, help='Path to image. Must include file extension')
-    parser.add_argument('-t', help='What file type each image should be saved as', nargs='?', const='.png')
+    parser = argparse.ArgumentParser(
+        description='Slices clusters of pixels into separate images')
+    parser.add_argument('image', metavar='i', type=str,
+                        help='Path to image. Must include file extension')
+    parser.add_argument(
+        '-t', help='What file type each image should be saved as', nargs='?', const='.png')
     args = parser.parse_args()
 
     # Sets Default image format
@@ -233,7 +238,7 @@ def start_slice():
         sys.exit('The file could not be found')
 
     pixels = orig_image.convert('RGBA')
-    data = list(pixels.getdata(3))  
+    data = list(pixels.getdata(3))
 
     width_img, height_img = orig_image.size
     # Only gets Alpha Channels
@@ -247,7 +252,8 @@ def start_slice():
     start_point = find_point(width_img, height_img, coord_dic)
 
     while start_point is not None:
-        slice_image(img_count, start_point, coord_dic, pixels, orig_image, filepath, img_format)
+        slice_image(img_count, start_point, coord_dic,
+                    pixels, orig_image, filepath, img_format)
         img_count += 1
         start_point = find_point(width_img, height_img, coord_dic)
 
