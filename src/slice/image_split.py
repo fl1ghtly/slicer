@@ -1,6 +1,10 @@
 from PIL import Image, ImageOps
 from queue import LifoQueue
-import os, sys
+import os 
+import sys
+import time
+import itertools
+import threading
 
 # Set default format
 img_format = '.png'
@@ -157,7 +161,10 @@ def slice_image(img_num, start, coord_map, converted_image, original_image, path
     # memo_bound is a set because lookup is O(1) instead of list O(n)
     memo_bound = set()
 
+    thread = threading.Thread(target=show_progress)
+    thread.start()
     expand_search(start, memo_bound, coord_map)
+    thread.is_loading = False
     
     min_x_bound, max_x_bound = find_x_bounds(memo_bound)
     min_y_bound, max_y_bound = find_y_bounds(memo_bound)
@@ -223,6 +230,19 @@ def start_slice():
         start_point = find_point(width_img, height_img, coord_dic)
 
     print("Finished!")
+
+
+def show_progress():
+    progress_thread = threading.currentThread()
+    load_str = ''
+    while getattr(progress_thread, "is_loading", True):
+        if len(load_str) >= 3:
+            load_str = ''
+            sys.stdout.write("\033[K")
+        else:
+            load_str += '.'
+        print(load_str, end='\r')
+        time.sleep(0.2)
 
 
 if __name__ == '__main__':
