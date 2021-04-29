@@ -1,6 +1,6 @@
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/fl1ghtly/slicer?style=flat-square)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/slicer-img)
-![GitHub](https://img.shields.io/github/license/fl1ghtly/slicer)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/slicer-img?style=flat-square)
+![GitHub](https://img.shields.io/github/license/fl1ghtly/slicer?style=flat-square)
 # Description
 This script takes images and uses transparent pixel grids in order to seperate each object into smaller files. A test image is included in order to see how this script works.
 
